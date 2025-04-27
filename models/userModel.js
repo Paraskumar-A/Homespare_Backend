@@ -16,26 +16,22 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "please provide your password"],
-    minlength: 8,
+    minlength: 3,
     select: false,
   },
-  passwordConfirm: {
-    type: String,
-    required: [true, "please confirm your password"],
-    validate: {
-      validator: function (el) {
-        return el === this.password;
-      },
-      message: "password are not the same!!!",
-    },
-  },
-  phone: {
-    type: String,
-    required: [true, "please provide your phone number"],
-  },
+  // passwordConfirm: {
+  //   type: String,
+  //   required: [true, "please provide your Confirm password"],
+  //   minlength: 3,
+  //   select: false,
+  // },
+  // phone: {
+  //   type: String,
+  //   required: [true, "please provide your phone number"],
+  // },
   role: {
     type: String,
-    enum: ["agent", "admin", "client"],
+    enum: ["admin", "client"],
     default: "client",
   },
   passwordChangedAt: Date,
@@ -54,7 +50,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
 
   // Delete passwordConfirm field
-  this.passwordConfirm = undefined;
   next();
 });
 
@@ -92,6 +87,6 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
-const User = mongoose.model("User", userSchema);
+const User = new mongoose.model("User", userSchema);
 
 module.exports = User;

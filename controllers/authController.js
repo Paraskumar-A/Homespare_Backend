@@ -58,10 +58,20 @@ exports.signUp = catchAsync(async (req, res, next) => {
   }
   let createUser = null;
   try {
+    console.log("req.body", req.body);
+    console.log("req.body.passwordConfirm", req.body.passwordConfirm);
+    console.log("req.body.passwordConfirm", req.body.password);
+    if (req.body.passwordConfirm !== req.body.password) {
+      return sendErrorResponse(
+        res,
+        "Password and Confirm Password should be same",
+        400,
+        {}
+      );
+    }
     createUser = await User.create({
       email: req.body.email,
       password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
       phone: req.body.phone,
       role: req.body?.role,
       fullName: req.body.fullName,
@@ -276,9 +286,8 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
       return next(new AppError("Your current password is wrong", 401));
     }
     user.password = req.body.password;
-    user.passwordConfirm = req.body.passwordConfirm;
+    await bcrypt.hash(req.body.password, 12);
     await user.save();
-    user.password = undefined;
     createSendToken(user, 200, res);
   } catch (error) {
     sendErrorResponse(res, "Internal Server error", 500, error);
